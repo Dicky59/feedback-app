@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FeedbackService } from '../services/feedbackService';
 import type { FeedbackRequest } from '../types/feedback';
 
 export const FeedbackForm: React.FC = () => {
@@ -8,6 +9,9 @@ export const FeedbackForm: React.FC = () => {
     message: '',
   });
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -16,13 +20,32 @@ export const FeedbackForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await FeedbackService.submitFeedback(formData);
+      setMessage(`Thank you! Your feedback has been submitted successfully. Reference ID: ${response.id}`);
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setMessage(error instanceof Error ? error.message : 'Error submitting feedback. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
+      {message && (
+        <div className={`message ${message.includes('Thank you') ? 'success' : 'error'}`}>
+          {message}
+        </div>
+      )}
+
       <h2>Submit Your Feedback</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -60,7 +83,9 @@ export const FeedbackForm: React.FC = () => {
           />
         </div>
 
-        <button type="submit">Submit Feedback</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Submitting...' : 'Submit Feedback'}
+        </button>
       </form>
     </div>
   );
