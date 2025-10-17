@@ -1,0 +1,31 @@
+# --- Root/IDE ---
+.idea/
+.vscode/
+.DS_Store
+*.iml
+
+# --- Java / Spring (Maven/Gradle) ---
+**/target/
+**/build/
+**/.gradle/
+**/out/
+**/.settings/
+**/.classpath
+**/.project
+
+# Logs
+**/logs/
+**/*.log
+
+# --- Node / React ---
+**/node_modules/
+**/.next/
+**/.turbo/
+**/dist/
+**/build/
+
+# Env & local configs
+**/.env
+**/.env.*.local
+**/.env.local
+**/.DS_Store
