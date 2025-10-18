@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useFormValidation } from '../hooks/useFormValidation';
 import { FeedbackService } from '../services/feedbackService';
-import type { FeedbackRequest } from '../types/feedback';
+import type { FeedbackData } from '../types/feedback';
+import './FeedbackForm.css';
 
 export const FeedbackForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +33,7 @@ export const FeedbackForm: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    updateField(name as keyof FeedbackRequest, value);
+    updateField(name as keyof FeedbackData, value);
 
     if (message) {
       setMessage('');
@@ -63,7 +64,7 @@ export const FeedbackForm: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="feedback-form-container">
       {message && (
         <div className={`message ${message.includes('Thank you') ? 'success' : 'error'}`}>
           {message}
@@ -71,9 +72,9 @@ export const FeedbackForm: React.FC = () => {
       )}
 
       <h2>Submit Your Feedback</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Name:</label>
+      <form className="feedback-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="name">Name</label>
           <input
             type="text"
             id="name"
@@ -81,13 +82,14 @@ export const FeedbackForm: React.FC = () => {
             value={formData.name}
             onChange={handleInputChange}
             className={errors.name ? 'error' : ''}
+            placeholder="Enter your full name"
             required
           />
           {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
 
-        <div>
-          <label htmlFor="email">Email:</label>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
@@ -95,19 +97,21 @@ export const FeedbackForm: React.FC = () => {
             value={formData.email}
             onChange={handleInputChange}
             className={errors.email ? 'error' : ''}
+            placeholder="Enter your email address"
             required
           />
           {errors.email && <span className="error-message">{errors.email}</span>}
         </div>
 
-        <div>
-          <label htmlFor="message">Message:</label>
+        <div className="form-group">
+          <label htmlFor="message">Message</label>
           <textarea
             id="message"
             name="message"
             value={formData.message}
             onChange={handleInputChange}
             className={errors.message ? 'error' : ''}
+            placeholder="Please share your feedback, suggestions, or comments..."
             required
           />
           {errors.message && <span className="error-message">{errors.message}</span>}
@@ -115,6 +119,7 @@ export const FeedbackForm: React.FC = () => {
 
         <button
           type="submit"
+          className="submit-button"
           disabled={isSubmitting || !isFormValid}
         >
           {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
