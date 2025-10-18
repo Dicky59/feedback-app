@@ -25,6 +25,11 @@ export class FeedbackService {
       return data;
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      // Re-throw the original error if it's already an Error instance
+      if (error instanceof Error) {
+        throw error;
+      }
+      // Otherwise, throw a generic error for unexpected error types
       throw new Error('Failed to submit feedback. Please try again.');
     }
   }
