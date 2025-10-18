@@ -11,7 +11,7 @@ export const FeedbackForm: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'success' | 'error'>('success');
 
-  // Auto-close success modal after 3 seconds
+  // Auto-close success modal after 2 seconds
   useEffect(() => {
     if (isModalOpen && modalType === 'success') {
       const timer = setTimeout(() => {
@@ -95,7 +95,9 @@ export const FeedbackForm: React.FC = () => {
             placeholder="Enter your full name"
             required
           />
-          {errors.name && <span className="error-message">{errors.name}</span>}
+          <span className={`error-message ${errors.name ? 'visible' : 'hidden'}`}>
+            {errors.name || ' '}
+          </span>
         </div>
 
         <div className="form-group">
@@ -110,7 +112,9 @@ export const FeedbackForm: React.FC = () => {
             placeholder="Enter your email address"
             required
           />
-          {errors.email && <span className="error-message">{errors.email}</span>}
+          <span className={`error-message ${errors.email ? 'visible' : 'hidden'}`}>
+            {errors.email || ' '}
+          </span>
         </div>
 
         <div className="form-group">
@@ -124,7 +128,9 @@ export const FeedbackForm: React.FC = () => {
             placeholder="Please share your feedback, suggestions, or comments..."
             required
           />
-          {errors.message && <span className="error-message">{errors.message}</span>}
+          <span className={`error-message ${errors.message ? 'visible' : 'hidden'}`}>
+            {errors.message || ' '}
+          </span>
         </div>
 
         <button
@@ -142,7 +148,7 @@ export const FeedbackForm: React.FC = () => {
         type={modalType}
       >
         <p className={`modal-message ${modalType}`}>
-          {message || 'Test message - no message set'}
+          {message}
         </p>
       </Modal>
     </div>
