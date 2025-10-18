@@ -1,40 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useFormValidation } from '../hooks/useFormValidation';
 import { FeedbackService } from '../services/feedbackService';
 import type { FeedbackRequest } from '../types/feedback';
 
 export const FeedbackForm: React.FC = () => {
-  const [formData, setFormData] = useState<FeedbackRequest>({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Auto-clear success messages after 3 seconds
+  useEffect(() => {
+    if (message && message.includes('Thank you')) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  const {
+    formData,
+    errors,
+    isFormValid,
+    updateField,
+    resetForm
+  } = useFormValidation({
     name: '',
     email: '',
     message: '',
   });
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    updateField(name as keyof FeedbackRequest, value);
+
+    if (message) {
+      setMessage('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setLoading(true);
+    if (!isFormValid) {
+      setMessage('Please fix the validation errors before submitting.');
+      return;
+    }
+
+    setIsSubmitting(true);
     setMessage('');
 
     try {
       const response = await FeedbackService.submitFeedback(formData);
       setMessage(`Thank you! Your feedback has been submitted successfully. Reference ID: ${response.id}`);
-      setFormData({ name: '', email: '', message: '' });
+      resetForm();
     } catch (error) {
       console.error('Error submitting feedback:', error);
       setMessage(error instanceof Error ? error.message : 'Error submitting feedback. Please try again.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -56,8 +80,10 @@ export const FeedbackForm: React.FC = () => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
+            className={errors.name ? 'error' : ''}
             required
           />
+          {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
 
         <div>
@@ -68,8 +94,10 @@ export const FeedbackForm: React.FC = () => {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
+            className={errors.email ? 'error' : ''}
             required
           />
+          {errors.email && <span className="error-message">{errors.email}</span>}
         </div>
 
         <div>
@@ -79,12 +107,17 @@ export const FeedbackForm: React.FC = () => {
             name="message"
             value={formData.message}
             onChange={handleInputChange}
+            className={errors.message ? 'error' : ''}
             required
           />
+          {errors.message && <span className="error-message">{errors.message}</span>}
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Submitting...' : 'Submit Feedback'}
+        <button
+          type="submit"
+          disabled={isSubmitting || !isFormValid}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </button>
       </form>
     </div>
