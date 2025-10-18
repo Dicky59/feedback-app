@@ -3,21 +3,25 @@ import { useFormValidation } from '../hooks/useFormValidation';
 import { FeedbackService } from '../services/feedbackService';
 import type { FeedbackData } from '../types/feedback';
 import './FeedbackForm.css';
+import { Modal } from './Modal';
 
 export const FeedbackForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'success' | 'error'>('success');
 
-  // Auto-clear success messages after 3 seconds
+  // Auto-close success modal after 3 seconds
   useEffect(() => {
-    if (message && message.includes('Thank you')) {
+    if (isModalOpen && modalType === 'success') {
       const timer = setTimeout(() => {
+        setIsModalOpen(false);
         setMessage('');
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [message]);
+  }, [isModalOpen, modalType]);
 
   const {
     formData,
@@ -35,7 +39,8 @@ export const FeedbackForm: React.FC = () => {
     const { name, value } = e.target;
     updateField(name as keyof FeedbackData, value);
 
-    if (message) {
+    if (isModalOpen) {
+      setIsModalOpen(false);
       setMessage('');
     }
   };
@@ -45,6 +50,8 @@ export const FeedbackForm: React.FC = () => {
 
     if (!isFormValid) {
       setMessage('Please fix the validation errors before submitting.');
+      setModalType('error');
+      setIsModalOpen(true);
       return;
     }
 
@@ -54,23 +61,26 @@ export const FeedbackForm: React.FC = () => {
     try {
       const response = await FeedbackService.submitFeedback(formData);
       setMessage(`Thank you! Your feedback has been submitted successfully. Reference ID: ${response.id}`);
+      setModalType('success');
+      setIsModalOpen(true);
       resetForm();
     } catch (error) {
       console.error('Error submitting feedback:', error);
       setMessage(error instanceof Error ? error.message : 'Error submitting feedback. Please try again.');
+      setModalType('error');
+      setIsModalOpen(true);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setMessage('');
+  };
+
   return (
     <div className="feedback-form-container">
-      {message && (
-        <div className={`message ${message.includes('Thank you') ? 'success' : 'error'}`}>
-          {message}
-        </div>
-      )}
-
       <h2>Submit Your Feedback</h2>
       <form className="feedback-form" onSubmit={handleSubmit}>
         <div className="form-group">
@@ -125,6 +135,16 @@ export const FeedbackForm: React.FC = () => {
           {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
         </button>
       </form>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        type={modalType}
+      >
+        <p className={`modal-message ${modalType}`}>
+          {message || 'Test message - no message set'}
+        </p>
+      </Modal>
     </div>
   );
 };
