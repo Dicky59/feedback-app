@@ -32,7 +32,6 @@ describe('FeedbackForm', () => {
   it('renders the feedback form with all fields', () => {
     render(<FeedbackForm />);
 
-    expect(screen.getByText('Submit Your Feedback')).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Message')).toBeInTheDocument();

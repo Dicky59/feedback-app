@@ -1,4 +1,4 @@
-import type { FeedbackRequest, FeedbackResponse } from '../types/feedback';
+import type { FeedbackItem, FeedbackRequest, FeedbackResponse } from '../types/feedback';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -31,6 +31,36 @@ export class FeedbackService {
       }
       // Otherwise, throw a generic error for unexpected error types
       throw new Error('Failed to submit feedback. Please try again.');
+    }
+  }
+
+  /**
+   * Get all feedback entries from the backend
+   */
+  static async getAllFeedback(): Promise<FeedbackItem[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/feedback`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data: FeedbackItem[] = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      // Re-throw the original error if it's already an Error instance
+      if (error instanceof Error) {
+        throw error;
+      }
+      // Otherwise, throw a generic error for unexpected error types
+      throw new Error('Failed to fetch feedback. Please try again.');
     }
   }
 

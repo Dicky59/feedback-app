@@ -1,12 +1,15 @@
 package com.example.feedback.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +28,41 @@ public class FeedbackController {
 
     @Autowired
     private FeedbackRepository feedbackRepository;
+
+    /**
+     * Get all feedback entries.
+     * Logs the retrieval operation as required by the exercise.
+     */
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> getAllFeedback() {
+        logger.info("Received request to retrieve all feedback");
+
+        try {
+            List<Feedback> feedbackList = feedbackRepository.findAll();
+
+            List<Map<String, Object>> response = feedbackList.stream()
+                    .map(feedback -> {
+                        Map<String, Object> feedbackMap = new HashMap<>();
+                        feedbackMap.put("id", feedback.getId());
+                        feedbackMap.put("name", feedback.getName());
+                        feedbackMap.put("email", feedback.getEmail());
+                        feedbackMap.put("message", feedback.getMessage());
+                        feedbackMap.put("createdAt", feedback.getCreatedAt());
+                        return feedbackMap;
+                    })
+                    .collect(Collectors.toList());
+
+            logger.info("Successfully retrieved {} feedback entries", feedbackList.size());
+            logger.debug("Response created with {} feedback entries", response.size());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Failed to retrieve feedback: {}", e.getMessage());
+            logger.debug("Error details: ", e);
+            throw e;
+        }
+    }
 
     /**
      * Submit new feedback.

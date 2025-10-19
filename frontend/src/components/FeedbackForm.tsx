@@ -81,7 +81,6 @@ export const FeedbackForm: React.FC = () => {
 
   return (
     <div className="feedback-form-container">
-      <h2>Submit Your Feedback</h2>
       <form className="feedback-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name</label>

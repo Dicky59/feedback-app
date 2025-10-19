@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedbackData, FeedbackResponse } from '../types/feedback';
+import type { FeedbackData, FeedbackItem, FeedbackResponse } from '../types/feedback';
 import { FeedbackService } from './feedbackService';
 
 // Mock fetch globally
@@ -21,6 +21,14 @@ describe('FeedbackService', () => {
     id: 1,
     name: 'John Doe',
     message: 'Great service!',
+  };
+
+  const mockFeedbackItem: FeedbackItem = {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    message: 'Great service!',
+    createdAt: '2024-01-15T10:30:00',
   };
 
   it('submits feedback successfully', async () => {
@@ -118,5 +126,68 @@ describe('FeedbackService', () => {
       'http://localhost:8080/api/feedback',
       expect.any(Object)
     );
+  });
+
+  // GET functionality tests
+  it('fetches all feedback successfully', async () => {
+    const mockFeedbackList = [mockFeedbackItem];
+    const mockResponse = {
+      ok: true,
+      json: async () => mockFeedbackList,
+    };
+
+    mockFetch.mockResolvedValueOnce(mockResponse);
+
+    const result = await FeedbackService.getAllFeedback();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:8080/api/feedback',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    expect(result).toEqual(mockFeedbackList);
+  });
+
+  it('handles empty feedback list', async () => {
+    const mockResponse = {
+      ok: true,
+      json: async () => [],
+    };
+
+    mockFetch.mockResolvedValueOnce(mockResponse);
+
+    const result = await FeedbackService.getAllFeedback();
+
+    expect(result).toEqual([]);
+  });
+
+  it('handles API errors when fetching feedback', async () => {
+    const mockErrorResponse = {
+      ok: false,
+      status: 500,
+      json: async () => ({
+        error: 'Internal server error',
+        details: 'Database connection failed',
+      }),
+    };
+
+    mockFetch.mockResolvedValueOnce(mockErrorResponse);
+
+    await expect(FeedbackService.getAllFeedback())
+      .rejects
+      .toThrow('HTTP error! status: 500');
+  });
+
+  it('handles network errors when fetching feedback', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+    await expect(FeedbackService.getAllFeedback())
+      .rejects
+      .toThrow('Network error');
   });
 });

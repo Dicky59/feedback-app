@@ -16,6 +16,14 @@ export interface FeedbackResponse {
   message: string;
 }
 
+export interface FeedbackItem {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
+}
+
 export interface ValidationErrors {
   name?: string;
   email?: string;
