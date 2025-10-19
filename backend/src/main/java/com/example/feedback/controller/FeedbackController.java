@@ -1,16 +1,21 @@
 package com.example.feedback.controller;
 
-import com.example.feedback.model.Feedback;
-import com.example.feedback.repository.FeedbackRepository;
-import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.example.feedback.model.Feedback;
+import com.example.feedback.repository.FeedbackRepository;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -21,24 +26,37 @@ public class FeedbackController {
     @Autowired
     private FeedbackRepository feedbackRepository;
 
+    /**
+     * Submit new feedback.
+     * Logs incoming requests and responses as required by the exercise.
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> submitFeedback(@Valid @RequestBody FeedbackRequest request) {
-        logger.info("Received feedback submission request");
+        logger.info("Received feedback submission request for user: [REDACTED]");
+        logger.debug("Request details - Name length: {}, Email length: {}, Message length: {}",
+                request.getName() != null ? request.getName().length() : 0,
+                request.getEmail() != null ? request.getEmail().length() : 0,
+                request.getMessage() != null ? request.getMessage().length() : 0);
 
         try {
+            // Create and save feedback
             Feedback feedback = new Feedback(request.getName(), request.getEmail(), request.getMessage());
             Feedback savedFeedback = feedbackRepository.save(feedback);
 
+            // Create response
             Map<String, Object> response = new HashMap<>();
             response.put("id", savedFeedback.getId());
             response.put("name", savedFeedback.getName());
             response.put("message", savedFeedback.getMessage());
 
             logger.info("Feedback submitted successfully with ID: {}", savedFeedback.getId());
+            logger.debug("Response created for feedback ID: {}", savedFeedback.getId());
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Failed to submit feedback: {}", e.getMessage());
+            logger.debug("Error details: ", e);
             throw e;
         }
     }
@@ -58,18 +76,37 @@ public class FeedbackController {
         private String message;
 
         // Constructors, getters and setters
-        public FeedbackRequest() {}
+        public FeedbackRequest() {
+        }
+
         public FeedbackRequest(String name, String email, String message) {
             this.name = name;
             this.email = email;
             this.message = message;
         }
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
     }
 }
