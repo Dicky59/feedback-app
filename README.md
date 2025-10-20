@@ -330,6 +330,25 @@ logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
 - **Field Length Logging**: Logs field lengths instead of actual content
 - **No Sensitive Data**: Passwords and personal details are never logged
 
+## 🧩 Assessment Branch (timestamps + GET)
+
+As required by the assessment brief, there is a dedicated branch that adds timestamp fields to the database and responses, and implements the GET functionality to list all feedback entries.
+
+- **Branch name**: `feature/get-functionality`
+- **Includes**:
+  - `createdAt` timestamps persisted and returned by the API
+  - `GET /api/feedback` endpoint in the backend
+  - Frontend page with navigation to view the feedback list
+
+### Check out the branch
+
+```bash
+git fetch origin
+git checkout feature/get-functionality
+```
+
+You can open the app and navigate to “View Feedback” to see the list page in this branch.
+
 ## 🚀 Deployment
 
 ### Frontend Deployment
